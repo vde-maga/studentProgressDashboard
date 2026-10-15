@@ -5,11 +5,27 @@ from datetime import date
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from spd.domain.entities import DailySnapshot, Student
+from spd.domain.entities import Account, DailySnapshot, Student
 from spd.infrastructure import mappers
 from spd.infrastructure.db import models as orm
 
-__all__ = ["SqlAnalyticsRepository", "SqlStudentRepository"]
+__all__ = [
+    "SqlAccountRepository",
+    "SqlAnalyticsRepository",
+    "SqlStudentRepository",
+]
+
+
+class SqlAccountRepository:
+    """Read access to authentication credentials backed by PostgreSQL."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self._session = session
+
+    async def find_by_login(self, login: str) -> Account | None:
+        stmt = select(orm.User).where(orm.User.login == login)
+        row = await self._session.scalar(stmt)
+        return mappers.to_account(row) if row is not None else None
 
 
 class SqlStudentRepository:
