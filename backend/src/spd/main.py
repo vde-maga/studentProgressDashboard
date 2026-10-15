@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from spd import __version__
 from spd.api.v1.router import api_router
 from spd.core.config import Settings, get_settings
+from spd.core.errors import register_error_handlers
 from spd.core.logging import configure_logging
 
 API_PREFIX = "/api/v1"
@@ -25,6 +26,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         description="Progress, activity and cohort analytics for 42 students.",
     )
     app.state.settings = settings
+    register_error_handlers(app)
     app.include_router(api_router, prefix=API_PREFIX)
     return app
 
