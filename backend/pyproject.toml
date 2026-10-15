@@ -48,7 +48,7 @@ known-first-party = ["spd"]
 strict = true
 python_version = "3.13"
 mypy_path = "src"
-packages = ["spd"]
+files = ["src", "tests"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
