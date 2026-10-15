@@ -65,7 +65,7 @@ cov: ## Coverage report (backend, gate ≥80%)
 
 db-up: ## Start PostgreSQL (docker compose)
     docker-compose up -d db
-    @echo "✓ postgres up on :$${POSTGRES_PORT:-5432}"
+    @echo "✓ postgres up on :${POSTGRES_PORT:-5432}"
 
 db-down: ## Stop PostgreSQL
     docker-compose down
