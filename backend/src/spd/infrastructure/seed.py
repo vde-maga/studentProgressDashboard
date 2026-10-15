@@ -12,7 +12,6 @@ import asyncio
 import random
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, time, timedelta
-from decimal import Decimal
 
 from faker import Faker
 from sqlalchemy import delete, insert
@@ -27,6 +26,7 @@ from spd.domain.enums import (
     ProjectKind,
     Role,
 )
+from spd.domain.progress import level_for_xp
 from spd.infrastructure.db import models as orm
 from spd.infrastructure.db.session import create_engine, create_session_factory
 
@@ -98,9 +98,6 @@ _PROJECTS = [
     ("ft_transcendence", "ft_transcendence", 6, 200, ProjectKind.OUTER),
 ]
 
-_HIGH_MARK = Decimal("100.00")
-_MAX_LEVEL = Decimal("21.00")
-
 
 @dataclass(frozen=True, slots=True)
 class SeedConfig:
@@ -115,14 +112,6 @@ class SeedConfig:
     @property
     def start_date(self) -> date:
         return self.end_date - timedelta(days=self.days - 1)
-
-
-def level_for_xp(xp: int) -> Decimal:
-    """42-style level curve: level = sqrt(xp / 100), capped at 21."""
-    if xp <= 0:
-        return Decimal("0.00")
-    level = min(_MAX_LEVEL, (Decimal(xp) / Decimal(100)).sqrt())
-    return level.quantize(Decimal("0.01"))
 
 
 class Seeder:
