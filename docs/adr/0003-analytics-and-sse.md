@@ -9,11 +9,11 @@
 
 Phases 2–4 built the skeleton, the data layer and authentication, but the API
 could only expose a caller's own credentials (`/auth/me`). The dashboard needs
-*progress* reads: a student's profile and level, a time series, an activity
+_progress_ reads: a student's profile and level, a time series, an activity
 feed, a skills breakdown, a cohort leaderboard and a cohort summary — plus a
 live feed so the UI can update without polling on a timer.
 
-Two structural questions had to be answered: where does the *behaviour* live,
+Two structural questions had to be answered: where does the _behaviour_ live,
 and how do we stream updates over HTTP in a way that is simple to operate and
 honest about its limits.
 
@@ -29,7 +29,7 @@ several endpoints. That orchestration is application logic, not HTTP and not
 SQL, so it now lives in `spd.application.analytics.AnalyticsService`.
 
 The layer stays thin and dependency-injected: the service is constructed from
-the domain repository *ports* (Protocols) in `spd.api.deps`, so it is exercised
+the domain repository _ports_ (Protocols) in `spd.api.deps`, so it is exercised
 in unit tests against in-memory fakes and never imports SQLAlchemy. This is the
 same "business rules over data, boundaries at the edges" stance as before — we
 are only adding it now that there is behaviour to hold.
@@ -49,16 +49,16 @@ entities to these models.
 
 ### 3. A complete but small set of endpoints
 
-| Endpoint | Who | Returns |
-| --- | --- | --- |
-| `GET /students` | staff/admin | a page of student accounts |
-| `GET /students/{login}` | owner or staff/admin | profile, rank, level progression |
+| Endpoint                         | Who                  | Returns                             |
+| -------------------------------- | -------------------- | ----------------------------------- |
+| `GET /students`                  | staff/admin          | a page of student accounts          |
+| `GET /students/{login}`          | owner or staff/admin | profile, rank, level progression    |
 | `GET /students/{login}/progress` | owner or staff/admin | daily time series (`since`/`until`) |
-| `GET /students/{login}/activity` | owner or staff/admin | recent activity, newest first |
-| `GET /students/{login}/skills` | owner or staff/admin | skills with current levels |
-| `GET /leaderboard` | any authenticated | cohort ranked by XP |
-| `GET /cohort/summary` | any authenticated | aggregate cohort statistics |
-| `GET /events/stream` | any authenticated | live activity as SSE |
+| `GET /students/{login}/activity` | owner or staff/admin | recent activity, newest first       |
+| `GET /students/{login}/skills`   | owner or staff/admin | skills with current levels          |
+| `GET /leaderboard`               | any authenticated    | cohort ranked by XP                 |
+| `GET /cohort/summary`            | any authenticated    | aggregate cohort statistics         |
+| `GET /events/stream`             | any authenticated    | live activity as SSE                |
 
 Authorisation is owner-only for a student's own details and staff/admin for
 everything: `ensure_can_view` allows staff/admins unconditionally and students
