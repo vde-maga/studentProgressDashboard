@@ -20,6 +20,7 @@ from spd.domain.enums import (
 )
 
 __all__ = [
+    "Account",
     "ActivityEvent",
     "Audit",
     "Campus",
@@ -33,6 +34,20 @@ __all__ = [
 ]
 
 Id = int
+
+
+@dataclass(frozen=True, slots=True)
+class Account:
+    """Authentication view of a user: identity plus the stored secret.
+
+    Kept separate from :class:`Student` so the credential hash never travels
+    with the profile data returned to clients.
+    """
+
+    id: Id
+    login: str
+    role: Role
+    password_hash: str
 
 
 @dataclass(frozen=True, slots=True)
