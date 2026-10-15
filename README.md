@@ -4,6 +4,13 @@
 
 [![CI](https://github.com/vde-maga/studentProgressDashboard/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 
+## Status
+
+The **backend is complete** (phases 1–5): PostgreSQL data layer, JWT auth and
+the analytics API with a live SSE stream. The **React frontend** (phases 6–8)
+and the **final docs/release** (phase 10) are in progress — commands that
+mention a frontend are inert until it is scaffolded.
+
 ## Quickstart (NixOS)
 
 ```bash
@@ -79,9 +86,9 @@ The stream resends nothing: it is a cursor over activity events, resumable via
 ├── flake.nix        # Nix dev environment (toolchain + checks + formatter)
 ├── justfile         # task runner — start here with `just help`
 ├── compose.yaml     # PostgreSQL for local dev
-├── backend/         # FastAPI app (api / core / domain / infrastructure)
-├── frontend/        # React app (app / features / shared)
-└── docs/            # ADRs, architecture, screenshots
+├── backend/         # FastAPI app (api / application / domain / infrastructure)
+├── frontend/        # React app (planned — phases 6–8)
+└── docs/            # ADRs (architecture notes and screenshots to come)
 ```
 
 ## License
