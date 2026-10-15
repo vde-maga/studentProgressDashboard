@@ -12,6 +12,7 @@ import asyncio
 import random
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, time, timedelta
+from decimal import Decimal
 
 from faker import Faker
 from sqlalchemy import delete, insert
@@ -135,6 +136,7 @@ class Seeder:
         )
         await self._seed_audits(session, student_ids, finished_enrollments)
         await self._seed_activity(session, student_ids, project_ids, finishes)
+        await self._seed_skill_levels(session, student_ids)
         await session.commit()
 
     @staticmethod
@@ -390,6 +392,26 @@ class Seeder:
         await self._bulk_insert(session, orm.ActivityEvent, event_rows)
         await self._bulk_insert(session, orm.DailySnapshot, snapshot_rows)
         await session.flush()
+
+    async def _seed_skill_levels(
+        self, session: AsyncSession, student_ids: list[int]
+    ) -> None:
+        """Give most students a level in each skill, for the skills radar."""
+        rows: list[dict[str, object]] = []
+        for student_id in student_ids:
+            for skill_id in range(1, len(_SKILLS) + 1):
+                if self._rng.random() < 0.15:
+                    continue
+                rows.append(
+                    {
+                        "user_id": student_id,
+                        "skill_id": skill_id,
+                        "level": Decimal(str(round(self._rng.uniform(0, 18), 2))),
+                    }
+                )
+        if rows:
+            await self._bulk_insert(session, orm.SkillLevel, rows)
+            await session.flush()
 
     def _snapshots_for(
         self,
