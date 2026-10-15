@@ -8,11 +8,12 @@
 
 The **backend is complete** (phases 1–5): PostgreSQL data layer, JWT auth and
 the analytics API with a live SSE stream, behind a **CI pipeline** (phase 9).
-The **React frontend** is underway: the foundation is in place (phase 6 —
-routing, typed API client, auth session and design system), with the
-student/leaderboard views (phase 7), end-to-end tests (phase 8) and
-**final docs/release** (phase 10) still to come. The frontend runs under Vite in
-development (proxied to the API); there is no production build pipeline yet.
+The **React frontend** covers the sign-in flow, an authenticated session with
+transparent token refresh, the cohort dashboard, the leaderboard and the
+**student profile** (XP/level, progress and skills charts, live activity) —
+phases 6–7. End-to-end tests (phase 8) and the **final docs/release** (phase 10)
+are still to come. The frontend runs under Vite in development (proxied to the
+API); there is no production build pipeline yet.
 
 ## Quickstart (NixOS)
 
@@ -82,9 +83,11 @@ The stream resends nothing: it is a cursor over activity events, resumable via
 
 A React 19 + TypeScript SPA (Vite, TanStack Router/Query) styled with a
 "ligne claire × brutalism" design system (CSS Modules over shared design
-tokens). The foundation covers the sign-in flow, an authenticated session with
-transparent token refresh, protected routes, and the cohort dashboard and
-leaderboard views.
+tokens). The UI covers the sign-in flow, an authenticated session with
+transparent token refresh, protected routes, the cohort dashboard (aggregate
+stats and live cohort activity), the leaderboard, and the student profile —
+XP/level, a progress-over-time chart, a skills radar and a live activity feed,
+all drawn as hand-built SVG.
 
 ```bash
 just dev            # API :8000 + Vite :5173 (the SPA proxies /api to the API)
@@ -96,7 +99,8 @@ just build-frontend # production bundle into frontend/dist
 The dev server proxies `/api` to `http://localhost:8000`, so the browser sees a
 same-origin API and no CORS is needed. Point `VITE_API_URL` at a different
 origin (via `frontend/.env`) when needed. See
-[ADR 0004](docs/adr/0004-frontend-foundation.md) for the design.
+[ADR 0004](docs/adr/0004-frontend-foundation.md) and
+[ADR 0005](docs/adr/0005-profile-charts-and-live-feed.md) for the design.
 
 ## Stack
 

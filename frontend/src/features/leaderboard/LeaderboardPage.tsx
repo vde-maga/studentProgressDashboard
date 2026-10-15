@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 
 import { getLeaderboard } from '@/shared/api/endpoints'
 import { formatLevel, formatXp } from '@/shared/format'
@@ -50,8 +51,14 @@ export function LeaderboardPage() {
                   <tr key={entry.login}>
                     <td className={`numeric ${styles.rank}`}>{entry.rank}</td>
                     <td>
-                      <span className={styles.login}>{entry.login}</span>
-                      <span className={styles.name}>{entry.full_name}</span>
+                      <Link
+                        to="/students/$login"
+                        params={{ login: entry.login }}
+                        className={styles.studentLink}
+                      >
+                        <span className={styles.login}>{entry.login}</span>
+                        <span className={styles.name}>{entry.full_name}</span>
+                      </Link>
                     </td>
                     <td className="numeric">{entry.campus_code}</td>
                     <td className={`numeric ${styles.num}`}>

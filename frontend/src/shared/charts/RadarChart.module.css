@@ -1,0 +1,45 @@
+.figure {
+  margin: 0;
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  max-width: 26rem;
+  margin: 0 auto;
+  display: block;
+}
+
+.ring {
+  fill: none;
+  stroke: var(--color-ink-soft);
+  stroke-width: 1;
+  opacity: 0.4;
+}
+
+.axis {
+  stroke: var(--color-ink-soft);
+  stroke-width: 1;
+  opacity: 0.4;
+}
+
+.shape {
+  fill: color-mix(in srgb, var(--color-accent) 45%, transparent);
+  stroke: var(--color-ink);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.label {
+  fill: var(--fg-default);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+.empty {
+  padding: var(--space-5);
+  border: var(--border-thin);
+  color: var(--fg-muted);
+}

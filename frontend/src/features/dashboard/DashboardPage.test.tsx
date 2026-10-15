@@ -10,6 +10,10 @@ vi.mock('@/shared/api/endpoints', () => ({
   getCohortSummary: vi.fn(),
 }))
 
+vi.mock('@/shared/api/useActivityStream', () => ({
+  useActivityStream: () => ({ events: [], status: 'connecting' }),
+}))
+
 const summary: CohortSummary = {
   student_count: 120,
   total_xp: 45000,

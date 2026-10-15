@@ -1,0 +1,28 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.track {
+  height: 1.1rem;
+  border: var(--border-thin);
+  background: var(--color-paper);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-accent),
+    var(--color-accent) 8px,
+    color-mix(in srgb, var(--color-accent) 70%, var(--color-ink)) 8px,
+    color-mix(in srgb, var(--color-accent) 70%, var(--color-ink)) 16px
+  );
+  transition: width var(--duration-normal) var(--ease-out);
+}
+
+.caption {
+  align-self: flex-end;
+}
