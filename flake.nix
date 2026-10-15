@@ -42,6 +42,7 @@
 
           # ── Misc tooling ───────────────────────────────────────────
           git
+          gh
           gnumake
           jq
           openssl
