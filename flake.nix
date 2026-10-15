@@ -31,6 +31,9 @@
           uv
           ruff
           mypy
+          # manylinux wheels (greenlet via SQLAlchemy, psycopg, …) link
+          # libstdc++; NixOS keeps it out of the default loader path.
+          stdenv.cc.cc.lib
 
           # ── Node / frontend ───────────────────────────────────────
           nodejs_24
@@ -103,6 +106,9 @@
             echo "│  Student Progress Dashboard — dev shell      │"
             echo "│  just help   ·   nix fmt   ·   nix flake check│"
             echo "└──────────────────────────────────────────────┘"
+
+            # NixOS: expose libstdc++ so manylinux wheels (greenlet) can load.
+            export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ]}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
             # Container engine: docker if reachable, else the user's rootless podman socket.
             if [ -z "''${DOCKER_HOST:-}" ] && { [ ! -S /var/run/docker.sock ] || [ ! -w /var/run/docker.sock ]; }; then

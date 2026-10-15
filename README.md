@@ -23,6 +23,8 @@ just dev             # API :8000 + frontend :5173
 | `just setup`                 | Install backend/frontend deps + pre-commit hooks |
 | `just dev`                   | Run API + frontend in parallel                   |
 | `just test`                  | pytest + vitest                                  |
+| `just test-integration`      | Backend integration tests (testcontainers)       |
+| `just cov`                   | Backend coverage report (gate ≥80%)              |
 | `just test-e2e`              | Playwright end-to-end                            |
 | `just lint`                  | ruff, mypy, tsc, eslint                          |
 | `just fmt`                   | Format the whole repo (`nix fmt`)                |
