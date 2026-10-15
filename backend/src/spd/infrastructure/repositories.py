@@ -5,6 +5,7 @@ from decimal import Decimal
 from typing import Any, cast
 
 from sqlalchemy import func, select
+from sqlalchemy.dialects.postgresql import distinct_on
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.selectable import Subquery
 
@@ -175,7 +176,7 @@ def _latest_snapshot_subquery() -> Subquery[Any]:
             orm.DailySnapshot.level.label("level"),
             orm.DailySnapshot.projects_done.label("projects_done"),
         )
-        .distinct(orm.DailySnapshot.user_id)
+        .ext(distinct_on(orm.DailySnapshot.user_id))
         .order_by(orm.DailySnapshot.user_id, orm.DailySnapshot.day.desc())
         .subquery()
     )
