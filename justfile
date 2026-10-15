@@ -63,6 +63,9 @@ test-integration: ## Run integration tests (needs a container engine)
 test-frontend:
     @if [ -f frontend/package.json ]; then cd frontend && pnpm test; else echo "frontend not scaffolded yet"; fi
 
+build-frontend: ## Type-check and build the frontend bundle
+    @if [ -f frontend/package.json ]; then cd frontend && pnpm build; else echo "frontend not scaffolded yet"; fi
+
 test-e2e:
     @if [ -f frontend/package.json ]; then cd frontend && pnpm test:e2e; else echo "frontend not scaffolded yet"; fi
 

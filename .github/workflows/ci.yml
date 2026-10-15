@@ -75,3 +75,25 @@ jobs:
           gc-max-store-size-linux: 5G
       - name: nix flake check
         run: nix flake check
+
+  frontend:
+    name: frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: cachix/install-nix-action@v31
+      - uses: nix-community/cache-nix-action@v7
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('flake.lock', 'backend/uv.lock', 'frontend/pnpm-lock.yaml') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          gc-max-store-size-linux: 5G
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+      - name: Install dependencies
+        run: nix develop -c bash -c 'pnpm install --dir frontend --frozen-lockfile'
+      - name: Type-check, lint, test and build
+        run: nix develop -c bash -c 'just lint-frontend && just test-frontend && just build-frontend'

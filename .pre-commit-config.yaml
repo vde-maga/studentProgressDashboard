@@ -30,10 +30,10 @@ repos:
       # ── Frontend ─────────────────────────────────────────────────
       - id: prettier
         name: prettier
-        entry: bash -c 'if [ -d frontend/node_modules ]; then pnpm --dir frontend exec prettier --write "$@"; fi' --
+        entry: bash -c 'if [ -x frontend/node_modules/.bin/prettier ]; then frontend/node_modules/.bin/prettier --write "$@"; fi' --
         language: system
         files: \.(ts|tsx|css|json|md|yml|yaml)$
-        exclude: ^pnpm-lock\.yaml$
+        exclude: pnpm-lock\.yaml$
 
       # ── Nix ──────────────────────────────────────────────────────
       - id: nixfmt
