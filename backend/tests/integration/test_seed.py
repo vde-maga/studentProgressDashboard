@@ -7,8 +7,9 @@ import pytest
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from spd.domain.progress import level_for_xp
 from spd.infrastructure.db import models as orm
-from spd.infrastructure.seed import SeedConfig, Seeder, level_for_xp
+from spd.infrastructure.seed import SeedConfig, Seeder
 
 pytestmark = pytest.mark.integration
 

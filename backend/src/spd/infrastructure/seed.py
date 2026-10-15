@@ -27,6 +27,7 @@ from spd.domain.enums import (
     ProjectKind,
     Role,
 )
+from spd.domain.progress import level_for_xp
 from spd.infrastructure.db import models as orm
 from spd.infrastructure.db.session import create_engine, create_session_factory
 
@@ -98,9 +99,6 @@ _PROJECTS = [
     ("ft_transcendence", "ft_transcendence", 6, 200, ProjectKind.OUTER),
 ]
 
-_HIGH_MARK = Decimal("100.00")
-_MAX_LEVEL = Decimal("21.00")
-
 
 @dataclass(frozen=True, slots=True)
 class SeedConfig:
@@ -115,14 +113,6 @@ class SeedConfig:
     @property
     def start_date(self) -> date:
         return self.end_date - timedelta(days=self.days - 1)
-
-
-def level_for_xp(xp: int) -> Decimal:
-    """42-style level curve: level = sqrt(xp / 100), capped at 21."""
-    if xp <= 0:
-        return Decimal("0.00")
-    level = min(_MAX_LEVEL, (Decimal(xp) / Decimal(100)).sqrt())
-    return level.quantize(Decimal("0.01"))
 
 
 class Seeder:
@@ -146,6 +136,7 @@ class Seeder:
         )
         await self._seed_audits(session, student_ids, finished_enrollments)
         await self._seed_activity(session, student_ids, project_ids, finishes)
+        await self._seed_skill_levels(session, student_ids)
         await session.commit()
 
     @staticmethod
@@ -401,6 +392,26 @@ class Seeder:
         await self._bulk_insert(session, orm.ActivityEvent, event_rows)
         await self._bulk_insert(session, orm.DailySnapshot, snapshot_rows)
         await session.flush()
+
+    async def _seed_skill_levels(
+        self, session: AsyncSession, student_ids: list[int]
+    ) -> None:
+        """Give most students a level in each skill, for the skills radar."""
+        rows: list[dict[str, object]] = []
+        for student_id in student_ids:
+            for skill_id in range(1, len(_SKILLS) + 1):
+                if self._rng.random() < 0.15:
+                    continue
+                rows.append(
+                    {
+                        "user_id": student_id,
+                        "skill_id": skill_id,
+                        "level": Decimal(str(round(self._rng.uniform(0, 18), 2))),
+                    }
+                )
+        if rows:
+            await self._bulk_insert(session, orm.SkillLevel, rows)
+            await session.flush()
 
     def _snapshots_for(
         self,
