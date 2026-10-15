@@ -1,19 +1,23 @@
 import { useQuery } from '@tanstack/react-query'
 
+import { ActivityFeed } from '@/features/activity/ActivityFeed'
 import { getCohortSummary } from '@/shared/api/endpoints'
+import { useActivityStream } from '@/shared/api/useActivityStream'
 import { useAuth } from '@/shared/auth/useAuth'
 import { formatLevel, formatXp } from '@/shared/format'
 import { Alert } from '@/shared/ui/Alert'
+import { Card } from '@/shared/ui/Card'
 import { Spinner } from '@/shared/ui/Spinner'
 import { Stat } from '@/shared/ui/Stat'
 import styles from './DashboardPage.module.css'
 
 export function DashboardPage() {
   const { user } = useAuth()
-  const { data, isPending, isError, error } = useQuery({
+  const summary = useQuery({
     queryKey: ['cohort', 'summary'],
     queryFn: getCohortSummary,
   })
+  const { events, status } = useActivityStream(15)
 
   return (
     <div className={styles.page}>
@@ -25,22 +29,42 @@ export function DashboardPage() {
         </p>
       </header>
 
-      {isPending && <Spinner size="lg" label="Loading cohort" />}
-      {isError && <Alert tone="error">{error.message}</Alert>}
+      {summary.isPending && <Spinner size="lg" label="Loading cohort" />}
+      {summary.isError && <Alert tone="error">{summary.error.message}</Alert>}
 
-      {data && (
+      {summary.data && (
         <div className={styles.grid}>
-          <Stat label="Students" value={formatXp(data.student_count)} />
-          <Stat label="Total XP" value={formatXp(data.total_xp)} />
+          <Stat label="Students" value={formatXp(summary.data.student_count)} />
+          <Stat label="Total XP" value={formatXp(summary.data.total_xp)} />
           <Stat
             label="Average level"
-            value={formatLevel(data.average_level)}
+            value={formatLevel(summary.data.average_level)}
             hint="of 21"
           />
-          <Stat label="Projects done" value={formatXp(data.projects_done)} />
-          <Stat label="Active (7 days)" value={formatXp(data.active_last_7_days)} />
+          <Stat label="Projects done" value={formatXp(summary.data.projects_done)} />
+          <Stat
+            label="Active (7 days)"
+            value={formatXp(summary.data.active_last_7_days)}
+          />
         </div>
       )}
+
+      <Card
+        heading={
+          <span className={styles.feedHeading}>
+            Live activity
+            <span
+              className={`${styles.live} ${status === 'open' ? styles.liveOn : ''}`}
+              title={status === 'open' ? 'Live' : 'Connecting'}
+            >
+              ● live
+            </span>
+          </span>
+        }
+        eyebrow="Across the cohort"
+      >
+        <ActivityFeed items={events} showStudent emptyLabel="Waiting for activity…" />
+      </Card>
     </div>
   )
 }

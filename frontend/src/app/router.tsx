@@ -10,6 +10,7 @@ import { LoginPage } from '@/features/auth/LoginPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { LeaderboardPage } from '@/features/leaderboard/LeaderboardPage'
 import { NotFoundPage } from '@/features/notfound/NotFoundPage'
+import { StudentProfilePage } from '@/features/profile/StudentProfilePage'
 import { RequireAuth } from '@/shared/auth/RequireAuth'
 
 const rootRoute = createRootRoute({
@@ -44,6 +45,19 @@ const leaderboardRoute = createRoute({
   ),
 })
 
+const studentRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/students/$login',
+  component: () => {
+    const { login } = studentRoute.useParams()
+    return (
+      <RequireAuth>
+        <StudentProfilePage login={login} />
+      </RequireAuth>
+    )
+  },
+})
+
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
@@ -51,7 +65,7 @@ const loginRoute = createRoute({
 })
 
 const routeTree = rootRoute.addChildren([
-  appRoute.addChildren([dashboardRoute, leaderboardRoute]),
+  appRoute.addChildren([dashboardRoute, leaderboardRoute, studentRoute]),
   loginRoute,
 ])
 

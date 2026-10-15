@@ -25,6 +25,15 @@ export function AppShell() {
           <Link to="/leaderboard" className={styles.link}>
             Leaderboard
           </Link>
+          {user && (
+            <Link
+              to="/students/$login"
+              params={{ login: user.login }}
+              className={styles.link}
+            >
+              My profile
+            </Link>
+          )}
         </nav>
         <div className={styles.user}>
           {user && (

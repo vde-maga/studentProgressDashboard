@@ -71,6 +71,16 @@
   font-weight: 700;
 }
 
+.studentLink {
+  color: var(--fg-default);
+  text-decoration: none;
+}
+
+.studentLink:hover .login {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
 .name {
   display: block;
   color: var(--fg-muted);
