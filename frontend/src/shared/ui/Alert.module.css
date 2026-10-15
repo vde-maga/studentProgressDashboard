@@ -1,0 +1,19 @@
+.alert {
+  border: var(--border-thin);
+  border-left-width: 6px;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  background: var(--color-paper);
+}
+
+.error {
+  border-left-color: var(--color-danger);
+}
+
+.info {
+  border-left-color: var(--color-secondary);
+}
+
+.success {
+  border-left-color: var(--color-success);
+}

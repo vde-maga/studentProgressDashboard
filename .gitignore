@@ -50,6 +50,7 @@ node_modules/
 frontend/dist/
 frontend/dist-ssr/
 frontend/.vite/
+frontend/coverage/
 *.tsbuildinfo
 .turbo/
 

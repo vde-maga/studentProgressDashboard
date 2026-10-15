@@ -1,0 +1,15 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-8) var(--space-4);
+  max-width: 40rem;
+}
+
+.title {
+  font-size: var(--text-2xl);
+}
+
+.lead {
+  color: var(--fg-muted);
+}
