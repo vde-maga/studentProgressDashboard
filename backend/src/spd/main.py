@@ -18,6 +18,7 @@ API_PREFIX = "/api/v1"
 
 OPENAPI_TAGS = [
     {"name": "health", "description": "Liveness and readiness probes."},
+    {"name": "auth", "description": "Login, token refresh and current user."},
 ]
 
 
