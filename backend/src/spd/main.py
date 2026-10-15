@@ -12,6 +12,10 @@ from spd.core.middleware import RequestContextMiddleware
 
 API_PREFIX = "/api/v1"
 
+OPENAPI_TAGS = [
+    {"name": "health", "description": "Liveness and readiness probes."},
+]
+
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     """Build the FastAPI application.
@@ -22,10 +26,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings.environment)
 
+    docs_url = "/docs" if settings.docs_enabled else None
     app = FastAPI(
         title="Student Progress Dashboard API",
         version=__version__,
         description="Progress, activity and cohort analytics for 42 students.",
+        docs_url=docs_url,
+        redoc_url="/redoc" if settings.docs_enabled else None,
+        openapi_url="/openapi.json" if settings.docs_enabled else None,
+        openapi_tags=OPENAPI_TAGS,
     )
     app.state.settings = settings
     register_error_handlers(app)
