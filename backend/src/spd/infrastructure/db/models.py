@@ -56,16 +56,24 @@ __all__ = [
 ]
 
 
-def _enum(enum_type: type[StrEnum], name: str) -> SAEnum:
-    """Return a portable VARCHAR + CHECK enum (never a native PG enum)."""
+def _enum(enum_type: type[StrEnum]) -> SAEnum:
+    """Return a portable VARCHAR enum (never a native PostgreSQL enum)."""
     return SAEnum(
         enum_type,
-        name=name,
         native_enum=False,
-        create_constraint=True,
         validate_strings=True,
         values_callable=lambda members: [member.value for member in members],
     )
+
+
+def _enum_check(column: str, enum_type: type[StrEnum], name: str) -> CheckConstraint:
+    """Build the database-level CHECK constraint for a portable enum column.
+
+    Kept explicit (instead of ``Enum(create_constraint=True)``) so the naming
+    convention yields exactly one constraint and Alembic renders it once.
+    """
+    allowed = ", ".join(f"'{member.value}'" for member in enum_type)
+    return CheckConstraint(f"{column} IN ({allowed})", name=name)
 
 
 class Campus(TimestampMixin, Base):
@@ -84,11 +92,12 @@ class Cursus(TimestampMixin, Base):
     """A curriculum."""
 
     __tablename__ = "cursus"
+    __table_args__ = (_enum_check("kind", CursusKind, "cursus_kind"),)
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     code: Mapped[str] = mapped_column(String(32), unique=True)
     name: Mapped[str] = mapped_column(String(128))
-    kind: Mapped[CursusKind] = mapped_column(_enum(CursusKind, "cursus_kind"))
+    kind: Mapped[CursusKind] = mapped_column(_enum(CursusKind))
 
 
 class Skill(TimestampMixin, Base):
@@ -106,6 +115,7 @@ class Project(TimestampMixin, Base):
 
     __tablename__ = "projects"
     __table_args__ = (
+        _enum_check("kind", ProjectKind, "project_kind"),
         CheckConstraint("difficulty BETWEEN 1 AND 10", name="difficulty_range"),
         CheckConstraint("estimated_hours > 0", name="estimated_hours_positive"),
     )
@@ -115,7 +125,7 @@ class Project(TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(128))
     difficulty: Mapped[int] = mapped_column(SmallInteger)
     estimated_hours: Mapped[int] = mapped_column(Integer)
-    kind: Mapped[ProjectKind] = mapped_column(_enum(ProjectKind, "project_kind"))
+    kind: Mapped[ProjectKind] = mapped_column(_enum(ProjectKind))
     cursus_id: Mapped[int] = mapped_column(
         ForeignKey("cursus.id", ondelete="RESTRICT"), index=True
     )
@@ -125,14 +135,13 @@ class User(TimestampMixin, Base):
     """An account; students produce the progress data."""
 
     __tablename__ = "users"
+    __table_args__ = (_enum_check("role", Role, "role"),)
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     login: Mapped[str] = mapped_column(String(32), unique=True)
     email: Mapped[str] = mapped_column(String(254), unique=True)
     full_name: Mapped[str] = mapped_column(String(128))
-    role: Mapped[Role] = mapped_column(
-        _enum(Role, "role"), server_default=Role.STUDENT.value
-    )
+    role: Mapped[Role] = mapped_column(_enum(Role), server_default=Role.STUDENT.value)
     campus_id: Mapped[int] = mapped_column(
         ForeignKey("campuses.id", ondelete="RESTRICT"), index=True
     )
@@ -144,6 +153,7 @@ class Enrollment(TimestampMixin, Base):
 
     __tablename__ = "enrollments"
     __table_args__ = (
+        _enum_check("status", EnrollmentStatus, "enrollment_status"),
         CheckConstraint("attempt > 0", name="attempt_positive"),
         CheckConstraint(
             "final_mark IS NULL OR final_mark BETWEEN 0 AND 125",
@@ -158,9 +168,7 @@ class Enrollment(TimestampMixin, Base):
     project_id: Mapped[int] = mapped_column(
         ForeignKey("projects.id", ondelete="RESTRICT"), index=True
     )
-    status: Mapped[EnrollmentStatus] = mapped_column(
-        _enum(EnrollmentStatus, "enrollment_status")
-    )
+    status: Mapped[EnrollmentStatus] = mapped_column(_enum(EnrollmentStatus))
     final_mark: Mapped[int | None] = mapped_column(SmallInteger)
     attempt: Mapped[int] = mapped_column(SmallInteger, server_default="1")
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
@@ -213,6 +221,7 @@ class ActivityEvent(Base):
 
     __tablename__ = "activity_events"
     __table_args__ = (
+        _enum_check("kind", ActivityKind, "activity_kind"),
         Index(
             "ix_activity_events_user_id_day",
             "user_id",
@@ -224,7 +233,7 @@ class ActivityEvent(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    kind: Mapped[ActivityKind] = mapped_column(_enum(ActivityKind, "activity_kind"))
+    kind: Mapped[ActivityKind] = mapped_column(_enum(ActivityKind))
     day: Mapped[date] = mapped_column(Date)
     xp_delta: Mapped[int] = mapped_column(Integer, server_default="0")
     project_id: Mapped[int | None] = mapped_column(

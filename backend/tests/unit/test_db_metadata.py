@@ -46,9 +46,7 @@ def test_unique_and_foreign_keys_are_named() -> None:
     assert "uq_users_email" in constraint_names
 
     fk_names = {
-        fk.constraint.name
-        for fk in users.foreign_keys
-        if fk.constraint is not None
+        fk.constraint.name for fk in users.foreign_keys if fk.constraint is not None
     }
     assert fk_names == {"fk_users_campus_id_campuses"}
 
@@ -81,6 +79,12 @@ def test_check_constraints_are_named() -> None:
         "ck_enrollments_attempt_positive",
         "ck_enrollments_final_mark_range",
     } <= enrollments
+
+
+def test_no_duplicate_constraint_names_within_a_table() -> None:
+    for table in Base.metadata.tables.values():
+        names = [c.name for c in table.constraints]
+        assert len(names) == len(set(names)), f"duplicate constraint in {table.name}"
 
 
 def test_time_series_are_indexed() -> None:
