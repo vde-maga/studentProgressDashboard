@@ -1,12 +1,14 @@
 """Application factory and ASGI entrypoint."""
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from spd import __version__
 from spd.api.v1.router import api_router
 from spd.core.config import Settings, get_settings
 from spd.core.errors import register_error_handlers
 from spd.core.logging import configure_logging
+from spd.core.middleware import RequestContextMiddleware
 
 API_PREFIX = "/api/v1"
 
@@ -27,6 +29,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.settings = settings
     register_error_handlers(app)
+    app.add_middleware(RequestContextMiddleware)
+    # Added last so it is outermost: error responses get CORS headers too.
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     app.include_router(api_router, prefix=API_PREFIX)
     return app
 
