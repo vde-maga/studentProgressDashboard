@@ -9,6 +9,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _MIN_STRONG_SECRET = 32
 
+# Publicly-known placeholder used only for local development and tests. It is
+# long enough for HS256 (>= 32 bytes) but must never reach production, which is
+# enforced by the validator below.
+_DEV_JWT_SECRET = "dev-only-insecure-secret-change-me"
+
 
 class Environment(StrEnum):
     """Runtime environment the API is configured for."""
@@ -29,7 +34,8 @@ class Settings(BaseSettings):
 
     environment: Environment = Environment.DEVELOPMENT
     database_url: str = "postgresql+psycopg://spd:spd@localhost:5432/spd_dev"
-    jwt_secret: SecretStr = SecretStr("dev-only-insecure-secret")
+    jwt_secret: SecretStr = SecretStr(_DEV_JWT_SECRET)
+    jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = Field(default=15, ge=1)
     jwt_refresh_token_expire_days: int = Field(default=14, ge=1)
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
@@ -49,7 +55,7 @@ class Settings(BaseSettings):
     def _require_strong_secret_in_production(self) -> "Settings":
         if self.environment is Environment.PRODUCTION:
             secret = self.jwt_secret.get_secret_value()
-            if secret == "dev-only-insecure-secret" or len(secret) < _MIN_STRONG_SECRET:
+            if secret == _DEV_JWT_SECRET or len(secret) < _MIN_STRONG_SECRET:
                 msg = "JWT_SECRET must be a strong value (>= 32 chars) in production"
                 raise ValueError(msg)
         return self

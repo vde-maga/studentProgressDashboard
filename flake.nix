@@ -108,7 +108,9 @@
             echo "└──────────────────────────────────────────────┘"
 
             # NixOS: expose libstdc++ so manylinux wheels (greenlet) can load.
-            export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ]}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+            export LD_LIBRARY_PATH="${
+              pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ]
+            }''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
             # Container engine: docker if reachable, else the user's rootless podman socket.
             if [ -z "''${DOCKER_HOST:-}" ] && { [ ! -S /var/run/docker.sock ] || [ ! -w /var/run/docker.sock ]; }; then

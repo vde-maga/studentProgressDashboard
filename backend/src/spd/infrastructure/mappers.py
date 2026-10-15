@@ -15,6 +15,7 @@ from spd.domain.enums import (
 from spd.infrastructure.db import models as orm
 
 __all__ = [
+    "to_account",
     "to_activity_event",
     "to_campus",
     "to_cursus",
@@ -25,6 +26,15 @@ __all__ = [
     "to_skill_level",
     "to_student",
 ]
+
+
+def to_account(row: orm.User) -> domain.Account:
+    return domain.Account(
+        id=row.id,
+        login=row.login,
+        role=Role(row.role),
+        password_hash=row.password_hash,
+    )
 
 
 def to_campus(row: orm.Campus) -> domain.Campus:

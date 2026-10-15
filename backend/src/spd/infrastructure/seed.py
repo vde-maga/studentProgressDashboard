@@ -30,9 +30,19 @@ from spd.domain.enums import (
 from spd.infrastructure.db import models as orm
 from spd.infrastructure.db.session import create_engine, create_session_factory
 
-__all__ = ["SeedConfig", "Seeder"]
+__all__ = ["DEMO_PASSWORD", "SeedConfig", "Seeder"]
 
 _ONE_DAY = timedelta(days=1)
+
+# Password shared by every seeded account, so the demo is explorable without
+# real credentials. The hash is a precomputed Argon2id value of this exact
+# password: storing it verbatim keeps seeding deterministic (no per-run salt).
+# It is demo data only and never used outside the seeder.
+DEMO_PASSWORD = "42cursus!"
+_DEMO_PASSWORD_HASH = (
+    "$argon2id$v=19$m=65536,t=3,p=4$EdDL40HY8Fb9cC1ugVOxjw"
+    "$CM493hQoOWqvIltRfkN9L+v/ZbzZ6YsYRNHtMoW/lpQ"
+)
 
 # Rows per INSERT statement. Multi-row VALUES keep bulk seeding to one round
 # trip per chunk instead of one per row (hundreds of times faster over a socket).
@@ -230,6 +240,7 @@ class Seeder:
                     "login": login,
                     "email": f"{login}@student.42.fr",
                     "full_name": self._faker.name(),
+                    "password_hash": _DEMO_PASSWORD_HASH,
                     "role": Role.STUDENT.value,
                     "campus_id": self._rng.choice(campus_ids),
                     "blackholed_at": blackholed,

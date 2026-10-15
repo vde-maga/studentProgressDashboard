@@ -9,9 +9,17 @@ independent of SQLAlchemy and lets tests substitute fast in-memory fakes
 from datetime import date
 from typing import Protocol
 
-from spd.domain.entities import DailySnapshot, Student
+from spd.domain.entities import Account, DailySnapshot, Student
 
-__all__ = ["AnalyticsRepository", "StudentRepository"]
+__all__ = ["AccountRepository", "AnalyticsRepository", "StudentRepository"]
+
+
+class AccountRepository(Protocol):
+    """Read access to authentication credentials."""
+
+    async def find_by_login(self, login: str) -> Account | None:
+        """Return the account with ``login`` (with its hash), or ``None``."""
+        ...
 
 
 class StudentRepository(Protocol):

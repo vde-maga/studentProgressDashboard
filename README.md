@@ -32,6 +32,19 @@ just dev             # API :8000 + frontend :5173
 | `just migrate` / `just seed` | Alembic migrations / deterministic seed data     |
 | `nix flake check`            | Nix checks (formatting, …)                       |
 
+## Authentication
+
+The API uses stateless JWT bearer tokens (Argon2id password hashing):
+
+| Endpoint             | Description                                      |
+| -------------------- | ------------------------------------------------ |
+| `POST /api/v1/auth/login`   | Exchange `login` + `password` for a token pair |
+| `POST /api/v1/auth/refresh` | Exchange a refresh token for a fresh pair      |
+| `GET  /api/v1/auth/me`      | Profile of the caller (requires a bearer token)|
+
+Seeded demo accounts all share the password `42cursus!`. See
+[ADR 0002](docs/adr/0002-authentication.md) for the design.
+
 ## Stack
 
 - **Backend** — Python 3.13, FastAPI, SQLAlchemy 2.0, Alembic, PostgreSQL 17, JWT auth, SSE
@@ -45,7 +58,7 @@ just dev             # API :8000 + frontend :5173
 ├── flake.nix        # Nix dev environment (toolchain + checks + formatter)
 ├── justfile         # task runner — start here with `just help`
 ├── compose.yaml     # PostgreSQL for local dev
-├── backend/         # FastAPI app (api / application / domain / infrastructure)
+├── backend/         # FastAPI app (api / core / domain / infrastructure)
 ├── frontend/        # React app (app / features / shared)
 └── docs/            # ADRs, architecture, screenshots
 ```
