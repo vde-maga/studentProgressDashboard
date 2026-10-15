@@ -16,11 +16,19 @@ logger = structlog.get_logger("spd.errors")
 class AppError(Exception):
     """Expected, domain-level failure mapped to a problem+json response."""
 
-    def __init__(self, status_code: int, code: str, detail: str) -> None:
+    def __init__(
+        self,
+        status_code: int,
+        code: str,
+        detail: str,
+        *,
+        headers: dict[str, str] | None = None,
+    ) -> None:
         super().__init__(detail)
         self.status_code = status_code
         self.code = code
         self.detail = detail
+        self.headers = headers
 
 
 def problem_response(
@@ -51,7 +59,7 @@ def problem_response(
 
 async def _app_error_handler(_: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, AppError)
-    return problem_response(exc.status_code, exc.code, exc.detail)
+    return problem_response(exc.status_code, exc.code, exc.detail, headers=exc.headers)
 
 
 async def _http_exception_handler(_: Request, exc: Exception) -> JSONResponse:

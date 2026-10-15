@@ -21,11 +21,13 @@ def test_production_requires_jwt_secret() -> None:
 
 
 def test_production_rejects_weak_or_default_secret() -> None:
+    default_secret = Settings(_env_file=None).jwt_secret.get_secret_value()
+
     with pytest.raises(ValidationError, match="JWT_SECRET"):
         Settings(
             _env_file=None,
             environment=Environment.PRODUCTION,
-            jwt_secret="dev-only-insecure-secret",
+            jwt_secret=default_secret,
         )
 
     with pytest.raises(ValidationError, match="JWT_SECRET"):
