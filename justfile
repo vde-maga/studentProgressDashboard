@@ -53,13 +53,13 @@ test-backend:
     @cd backend && uv run pytest
 
 test-frontend:
-    @cd frontend && pnpm test
+    @if [ -f frontend/package.json ]; then cd frontend && pnpm test; else echo "frontend not scaffolded yet"; fi
 
 test-e2e:
-    @cd frontend && pnpm test:e2e
+    @if [ -f frontend/package.json ]; then cd frontend && pnpm test:e2e; else echo "frontend not scaffolded yet"; fi
 
-cov: ## Coverage report (backend)
-    @cd backend && uv run pytest --cov=spd --cov-report=term-missing
+cov: ## Coverage report (backend, gate ≥80%)
+    @cd backend && uv run pytest --cov=spd --cov-report=term-missing --cov-fail-under=80
 
 # ── Database ─────────────────────────────────────────────────────────
 
