@@ -1,0 +1,21 @@
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary
+
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Merge drivers: lockfiles stay conflict-resolvable
+pnpm-lock.yaml merge=binary
+uv.lock merge=binary
+flake.lock merge=binary

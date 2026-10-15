@@ -1,0 +1,43 @@
+# pre-commit — hooks run with the tools from `nix develop` (DRY with CI).
+# Install once:  just setup   (or: pre-commit install)
+# Run manually:  pre-commit run --all-files
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: detect-private-key
+
+  - repo: local
+    hooks:
+      # ── Python ───────────────────────────────────────────────────
+      - id: ruff
+        name: ruff
+        entry: ruff check --fix --exit-non-zero-on-fix
+        language: system
+        types: [python]
+
+      - id: ruff-format
+        name: ruff format
+        entry: ruff format
+        language: system
+        types: [python]
+
+      # ── Frontend ─────────────────────────────────────────────────
+      - id: prettier
+        name: prettier
+        entry: bash -c 'if [ -d frontend/node_modules ]; then pnpm --dir frontend exec prettier --write "$@"; fi' --
+        language: system
+        files: \.(ts|tsx|css|json|md|yml|yaml)$
+        exclude: ^pnpm-lock\.yaml$
+
+      # ── Nix ──────────────────────────────────────────────────────
+      - id: nixfmt
+        name: nixfmt
+        entry: nixfmt
+        language: system
+        files: \.nix$
