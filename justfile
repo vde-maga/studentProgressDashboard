@@ -52,14 +52,17 @@ test: test-backend test-frontend ## Run all tests
 test-backend:
     @cd backend && uv run pytest
 
+test-integration: ## Run integration tests (needs a container engine)
+    @cd backend && uv run pytest -o addopts="" -m integration
+
 test-frontend:
     @if [ -f frontend/package.json ]; then cd frontend && pnpm test; else echo "frontend not scaffolded yet"; fi
 
 test-e2e:
     @if [ -f frontend/package.json ]; then cd frontend && pnpm test:e2e; else echo "frontend not scaffolded yet"; fi
 
-cov: ## Coverage report (backend, gate ≥80%)
-    @cd backend && uv run pytest --cov=spd --cov-report=term-missing --cov-fail-under=80
+cov: ## Coverage report (backend, gate ≥80%; includes integration tests)
+    @cd backend && uv run pytest -o addopts="" -m "integration or not integration" --cov=spd --cov-report=term-missing --cov-fail-under=80
 
 # ── Database ─────────────────────────────────────────────────────────
 

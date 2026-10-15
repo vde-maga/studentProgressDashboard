@@ -23,7 +23,10 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", get_settings().database_url)
+# Application Settings provide the URL in normal runs; tests may inject one
+# (e.g. a testcontainer) by setting sqlalchemy.url on the config beforehand.
+if not config.get_main_option("sqlalchemy.url"):
+    config.set_main_option("sqlalchemy.url", get_settings().database_url)
 target_metadata = Base.metadata
 
 
