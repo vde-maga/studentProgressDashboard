@@ -141,6 +141,7 @@ class User(TimestampMixin, Base):
     login: Mapped[str] = mapped_column(String(32), unique=True)
     email: Mapped[str] = mapped_column(String(254), unique=True)
     full_name: Mapped[str] = mapped_column(String(128))
+    password_hash: Mapped[str] = mapped_column(String(255))
     role: Mapped[Role] = mapped_column(_enum(Role), server_default=Role.STUDENT.value)
     campus_id: Mapped[int] = mapped_column(
         ForeignKey("campuses.id", ondelete="RESTRICT"), index=True

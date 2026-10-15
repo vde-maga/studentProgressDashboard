@@ -27,12 +27,23 @@ from spd.domain.enums import (
     ProjectKind,
     Role,
 )
+from spd.domain.progress import level_for_xp
 from spd.infrastructure.db import models as orm
 from spd.infrastructure.db.session import create_engine, create_session_factory
 
-__all__ = ["SeedConfig", "Seeder"]
+__all__ = ["DEMO_PASSWORD", "SeedConfig", "Seeder"]
 
 _ONE_DAY = timedelta(days=1)
+
+# Password shared by every seeded account, so the demo is explorable without
+# real credentials. The hash is a precomputed Argon2id value of this exact
+# password: storing it verbatim keeps seeding deterministic (no per-run salt).
+# It is demo data only and never used outside the seeder.
+DEMO_PASSWORD = "42cursus!"
+_DEMO_PASSWORD_HASH = (
+    "$argon2id$v=19$m=65536,t=3,p=4$EdDL40HY8Fb9cC1ugVOxjw"
+    "$CM493hQoOWqvIltRfkN9L+v/ZbzZ6YsYRNHtMoW/lpQ"
+)
 
 # Rows per INSERT statement. Multi-row VALUES keep bulk seeding to one round
 # trip per chunk instead of one per row (hundreds of times faster over a socket).
@@ -88,9 +99,6 @@ _PROJECTS = [
     ("ft_transcendence", "ft_transcendence", 6, 200, ProjectKind.OUTER),
 ]
 
-_HIGH_MARK = Decimal("100.00")
-_MAX_LEVEL = Decimal("21.00")
-
 
 @dataclass(frozen=True, slots=True)
 class SeedConfig:
@@ -105,14 +113,6 @@ class SeedConfig:
     @property
     def start_date(self) -> date:
         return self.end_date - timedelta(days=self.days - 1)
-
-
-def level_for_xp(xp: int) -> Decimal:
-    """42-style level curve: level = sqrt(xp / 100), capped at 21."""
-    if xp <= 0:
-        return Decimal("0.00")
-    level = min(_MAX_LEVEL, (Decimal(xp) / Decimal(100)).sqrt())
-    return level.quantize(Decimal("0.01"))
 
 
 class Seeder:
@@ -136,6 +136,7 @@ class Seeder:
         )
         await self._seed_audits(session, student_ids, finished_enrollments)
         await self._seed_activity(session, student_ids, project_ids, finishes)
+        await self._seed_skill_levels(session, student_ids)
         await session.commit()
 
     @staticmethod
@@ -230,6 +231,7 @@ class Seeder:
                     "login": login,
                     "email": f"{login}@student.42.fr",
                     "full_name": self._faker.name(),
+                    "password_hash": _DEMO_PASSWORD_HASH,
                     "role": Role.STUDENT.value,
                     "campus_id": self._rng.choice(campus_ids),
                     "blackholed_at": blackholed,
@@ -390,6 +392,26 @@ class Seeder:
         await self._bulk_insert(session, orm.ActivityEvent, event_rows)
         await self._bulk_insert(session, orm.DailySnapshot, snapshot_rows)
         await session.flush()
+
+    async def _seed_skill_levels(
+        self, session: AsyncSession, student_ids: list[int]
+    ) -> None:
+        """Give most students a level in each skill, for the skills radar."""
+        rows: list[dict[str, object]] = []
+        for student_id in student_ids:
+            for skill_id in range(1, len(_SKILLS) + 1):
+                if self._rng.random() < 0.15:
+                    continue
+                rows.append(
+                    {
+                        "user_id": student_id,
+                        "skill_id": skill_id,
+                        "level": Decimal(str(round(self._rng.uniform(0, 18), 2))),
+                    }
+                )
+        if rows:
+            await self._bulk_insert(session, orm.SkillLevel, rows)
+            await session.flush()
 
     def _snapshots_for(
         self,
