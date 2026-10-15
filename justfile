@@ -16,8 +16,13 @@ setup: ## Install dependencies (backend + frontend + git hooks)
 
 # ── Dev ──────────────────────────────────────────────────────────────
 
-dev: ## Run backend + frontend together
-    @just dev-backend & just dev-frontend & wait
+dev: ## Run backend + frontend together (frontend only if scaffolded)
+    @if [ -f frontend/package.json ]; then \
+        just dev-backend & just dev-frontend & wait; \
+    else \
+        echo "frontend not scaffolded yet — running backend only"; \
+        just dev-backend; \
+    fi
 
 dev-backend: ## Run the API (reload)
     @cd backend && uv run uvicorn spd.main:app --reload --host 0.0.0.0 --port 8000
