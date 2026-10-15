@@ -33,7 +33,7 @@ lint-backend:
     @if [ -d backend ]; then \
         ruff check backend/; \
         ruff format --check backend/; \
-        mypy backend/src; \
+        cd backend && uv run mypy; \
     fi
 
 lint-frontend:
