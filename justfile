@@ -69,6 +69,9 @@ build-frontend: ## Type-check and build the frontend bundle
 test-e2e:
     @if [ -f frontend/package.json ]; then cd frontend && pnpm test:e2e; else echo "frontend not scaffolded yet"; fi
 
+screenshots: ## Regenerate the README screenshots (needs `just db-up`)
+    @if [ -f frontend/package.json ]; then cd frontend && SCREENSHOTS=1 pnpm exec playwright test e2e/screenshots.spec.ts; else echo "frontend not scaffolded yet"; fi
+
 e2e-api: ## Migrate, seed and serve the API for Playwright (foreground)
     @cd backend && uv run alembic upgrade head
     @cd backend && uv run python -m spd.infrastructure.seed
