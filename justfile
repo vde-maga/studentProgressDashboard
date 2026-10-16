@@ -80,6 +80,15 @@ e2e-api: ## Migrate, seed and serve the API for Playwright (foreground)
 cov: ## Coverage report (backend, gate ≥80%; includes integration tests)
     @cd backend && uv run pytest -o addopts="" -m "integration or not integration" --cov=spd --cov-report=term-missing --cov-fail-under=80
 
+cov-frontend: ## Coverage report (frontend, gate configured in vite.config.ts)
+    @if [ -f frontend/package.json ]; then pnpm --dir frontend test:coverage; fi
+
+audit-backend: ## Audit Python dependencies for known vulnerabilities
+    @cd backend && uv run --with pip-audit pip-audit
+
+audit-frontend: ## Audit Node dependencies for known vulnerabilities
+    @pnpm --dir frontend audit --audit-level=high
+
 # ── Database ─────────────────────────────────────────────────────────
 
 db-up: ## Start PostgreSQL (docker compose)
