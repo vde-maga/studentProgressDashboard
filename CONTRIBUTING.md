@@ -53,6 +53,23 @@ CI runs the same formatters and checks.
 Add or update tests with your change. Both coverage gates (backend ≥80%,
 frontend thresholds in `frontend/vite.config.ts`) must stay green.
 
+## Dependency updates
+
+Dependabot opens grouped minor/patch PRs against `dev`. A few majors are held
+back on purpose, and their upgrade paths are not obvious:
+
+- **Playwright** — `@playwright/test` must match the browser bundle from the
+  Nix flake (`pkgs.playwright-driver`). Bump the `nix` flake input, then realign
+  `@playwright/test` in `frontend/package.json` in the same PR.
+- **TypeScript** — majors can change `tsconfig` semantics (TS 6 deprecates
+  `baseUrl`, which this project uses). Do the migration in a dedicated PR and
+  run `just lint-frontend && just build-frontend`.
+- **`@types/node`** — follows the Node runtime major from the flake
+  (`nodejs_24`); do not jump ahead of it.
+
+Dependabot reads `.github/dependabot.yml` from the default branch (`main`), so
+changes to the ignore rules only take effect once they reach `main`.
+
 ## Architecture decisions
 
 Non-obvious choices live in [`docs/adr/`](docs/adr) as numbered ADRs. If your
