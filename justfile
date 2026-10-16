@@ -72,6 +72,17 @@ test-e2e:
 screenshots: ## Regenerate the README screenshots (needs `just db-up`)
     @if [ -f frontend/package.json ]; then cd frontend && SCREENSHOTS=1 pnpm exec playwright test e2e/screenshots.spec.ts; else echo "frontend not scaffolded yet"; fi
 
+demo: ## Regenerate the README demo GIF (needs `just db-up`)
+    @if [ -f frontend/package.json ]; then \
+        cd frontend && DEMO=1 pnpm exec playwright test e2e/demo.spec.ts; \
+        video=$(ls -t test-results/*/video.webm 2>/dev/null | head -n1); \
+        if [ -z "$video" ]; then echo "no video recorded"; exit 1; fi; \
+        ffmpeg -y -loglevel error -i "$video" \
+            -vf "fps=12,scale=960:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer" \
+            ../docs/screenshots/demo.gif; \
+        echo "✓ docs/screenshots/demo.gif"; \
+    else echo "frontend not scaffolded yet"; fi
+
 e2e-api: ## Migrate, seed and serve the API for Playwright (foreground)
     @cd backend && uv run alembic upgrade head
     @cd backend && uv run python -m spd.infrastructure.seed
