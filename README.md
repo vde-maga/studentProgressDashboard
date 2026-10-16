@@ -11,9 +11,9 @@ the analytics API with a live SSE stream, behind a **CI pipeline** (phase 9).
 The **React frontend** covers the sign-in flow, an authenticated session with
 transparent token refresh, the cohort dashboard, the leaderboard and the
 **student profile** (XP/level, progress and skills charts, live activity) —
-phases 6–7. End-to-end tests (phase 8) and the **final docs/release** (phase 10)
-are still to come. The frontend runs under Vite in development (proxied to the
-API); there is no production build pipeline yet.
+phases 6–7 — with **end-to-end tests** over the real stack (phase 8). The
+**final docs/release** (phase 10) is still to come. The frontend runs under Vite
+in development (proxied to the API); there is no production build pipeline yet.
 
 ## Quickstart (NixOS)
 
@@ -94,13 +94,18 @@ just dev            # API :8000 + Vite :5173 (the SPA proxies /api to the API)
 just lint-frontend  # tsc --noEmit + eslint
 just test-frontend  # vitest
 just build-frontend # production bundle into frontend/dist
+just test-e2e       # Playwright (needs `just db-up` first)
 ```
 
 The dev server proxies `/api` to `http://localhost:8000`, so the browser sees a
 same-origin API and no CORS is needed. Point `VITE_API_URL` at a different
-origin (via `frontend/.env`) when needed. See
-[ADR 0004](docs/adr/0004-frontend-foundation.md) and
-[ADR 0005](docs/adr/0005-profile-charts-and-live-feed.md) for the design.
+origin (via `frontend/.env`) when needed.
+
+End-to-end tests drive the real stack in Chromium: Playwright starts the seeded
+API and the Vite server itself (start the database first with `just db-up`).
+See [ADR 0004](docs/adr/0004-frontend-foundation.md),
+[ADR 0005](docs/adr/0005-profile-charts-and-live-feed.md) and
+[ADR 0006](docs/adr/0006-end-to-end-tests.md) for the design.
 
 ## Stack
 
