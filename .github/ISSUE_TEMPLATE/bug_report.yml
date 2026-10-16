@@ -1,0 +1,46 @@
+name: Bug report
+description: Something is not working as expected.
+title: "fix: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. This is a portfolio demo — please don't include
+        secrets or personal data.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what did you see instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. `just db-up && just dev`
+        2. Sign in as …
+        3. …
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Backend (API, auth, SSE)
+        - Frontend (UI, routing, data)
+        - Tooling / CI / Nix
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, browser, and anything unusual about your setup.
+      placeholder: NixOS 25.05, Chromium 140 …
+    validations:
+      required: false
