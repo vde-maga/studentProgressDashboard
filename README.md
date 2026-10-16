@@ -46,6 +46,8 @@ cd studentProgressDashboard
 nix develop          # or: direnv allow
 just setup           # deps + git hooks
 just db-up           # PostgreSQL via docker compose
+just migrate         # apply Alembic migrations
+just seed            # deterministic demo data
 just dev             # API :8000 + frontend :5173
 ```
 
@@ -53,7 +55,7 @@ just dev             # API :8000 + frontend :5173
 
 | Command                      | What it does                                     |
 | ---------------------------- | ------------------------------------------------ |
-| `just help`                  | List all recipes                                 |
+| `just --list`                | List all recipes                                 |
 | `just setup`                 | Install backend/frontend deps + pre-commit hooks |
 | `just dev`                   | Run API + frontend in parallel                   |
 | `just test`                  | pytest + vitest                                  |
@@ -155,7 +157,7 @@ picture, request lifecycle and SSE flow are in
 
 ```
 ├── flake.nix        # Nix dev environment (toolchain + checks + formatter)
-├── justfile         # task runner — start here with `just help`
+├── justfile         # task runner — start here with `just --list`
 ├── compose.yaml     # PostgreSQL for local dev
 ├── backend/         # FastAPI app (api / application / domain / infrastructure)
 ├── frontend/        # React SPA (Vite + TanStack Router/Query + design tokens)
