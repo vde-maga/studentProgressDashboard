@@ -1,0 +1,41 @@
+.region {
+  position: fixed;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: min(24rem, calc(100vw - var(--space-4) * 2));
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  border: var(--border-thin);
+  border-left: 6px solid var(--color-danger);
+  background: var(--color-paper);
+  box-shadow: var(--shadow-hard);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.message {
+  flex: 1;
+}
+
+.close {
+  flex: none;
+  border: none;
+  background: transparent;
+  color: var(--fg-default);
+  font-size: var(--text-lg);
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 var(--space-1);
+}
+
+.close:hover {
+  color: var(--color-danger);
+}

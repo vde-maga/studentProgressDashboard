@@ -19,6 +19,7 @@ import { RadarChart } from '@/shared/charts/RadarChart'
 import { formatDay, formatLevel, formatXp } from '@/shared/format'
 import { Alert } from '@/shared/ui/Alert'
 import { Card } from '@/shared/ui/Card'
+import { LiveIndicator } from '@/shared/ui/LiveIndicator'
 import { Spinner } from '@/shared/ui/Spinner'
 import { Stat } from '@/shared/ui/Stat'
 import styles from './StudentProfilePage.module.css'
@@ -141,6 +142,8 @@ export function StudentProfilePage({ login }: StudentProfilePageProps) {
         <Card heading="XP over time" eyebrow="Daily snapshots">
           {progress.isPending ? (
             <Spinner label="Loading series" />
+          ) : progress.isError ? (
+            <Alert tone="error">{progress.error.message}</Alert>
           ) : (
             <LineChart
               values={levels}
@@ -153,6 +156,8 @@ export function StudentProfilePage({ login }: StudentProfilePageProps) {
         <Card heading="Skills" eyebrow="Current levels">
           {skills.isPending ? (
             <Spinner label="Loading skills" />
+          ) : skills.isError ? (
+            <Alert tone="error">{skills.error.message}</Alert>
           ) : (
             <RadarChart
               data={radar}
@@ -167,18 +172,15 @@ export function StudentProfilePage({ login }: StudentProfilePageProps) {
         heading={
           <span className={styles.feedHeading}>
             Activity
-            <span
-              className={`${styles.live} ${status === 'open' ? styles.liveOn : ''}`}
-              title={status === 'open' ? 'Live' : 'Connecting'}
-            >
-              ● live
-            </span>
+            <LiveIndicator status={status} />
           </span>
         }
         eyebrow="Recent events"
       >
         {activity.isPending && rows.length === 0 ? (
           <Spinner label="Loading activity" />
+        ) : activity.isError && rows.length === 0 ? (
+          <Alert tone="error">{activity.error.message}</Alert>
         ) : (
           <ActivityFeed items={rows} emptyLabel="No activity recorded yet." />
         )}

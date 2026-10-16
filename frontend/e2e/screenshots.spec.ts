@@ -22,7 +22,7 @@ test('captures the main screens', async ({ page }) => {
   await page.screenshot({ path: `${OUT}/01-login.png` })
 
   await signIn(page, STUDENT)
-  await page.getByTitle('Live').waitFor()
+  await page.getByText('Live', { exact: true }).waitFor()
   await page.screenshot({ path: `${OUT}/02-dashboard.png`, fullPage: true })
 
   await page.getByRole('link', { name: 'Leaderboard' }).click()
