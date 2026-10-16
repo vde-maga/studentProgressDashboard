@@ -17,6 +17,11 @@ This is a portfolio demo, not a production deployment — see
 [ADR 0007](docs/adr/0007-scope-and-deployment.md) for what that deliberately
 implies.
 
+A later **hardening pass** adds an error boundary and retry policy, an
+accessibility pass, a bounded and failure-tolerant SSE stream
+([ADR 0008](docs/adr/0008-error-handling-and-stream-lifecycle.md)), a frontend
+coverage gate and dependency scanning.
+
 ## Screenshots
 
 | Sign in                                             | Dashboard                                       |
@@ -46,10 +51,14 @@ just dev             # API :8000 + frontend :5173
 | `just test`                  | pytest + vitest                                  |
 | `just test-integration`      | Backend integration tests (testcontainers)       |
 | `just cov`                   | Backend coverage report (gate ≥80%)              |
+| `just cov`                   | Backend coverage report (gate ≥80%)              |
+| `just cov-frontend`          | Frontend coverage report (gate in `vite.config`) |
 | `just test-frontend`         | Frontend unit tests (vitest)                     |
 | `just build-frontend`        | Type-check and build the SPA (`frontend/dist`)   |
 | `just test-e2e`              | Playwright end-to-end against the real stack     |
 | `just screenshots`           | Regenerate the README screenshots                |
+| `just audit-backend`         | `pip-audit` over the backend dependencies        |
+| `just audit-frontend`        | `pnpm audit` for the frontend                    |
 | `just lint`                  | ruff, mypy, tsc, eslint                          |
 | `just fmt`                   | Format the whole repo (`nix fmt`)                |
 | `just db-up` / `db-reset`    | Start / recreate PostgreSQL                      |
@@ -86,8 +95,10 @@ are **owner-only**: a student reads their own data, staff/admins read anyone's.
 | `GET /api/v1/events/stream`             | authenticated  | Live activity feed (SSE)         |
 
 The stream resends nothing: it is a cursor over activity events, resumable via
-`Last-Event-ID`, with periodic heartbeats. Because `EventSource` cannot set an
-`Authorization` header, pass the access token as `?token=…`. See
+`Last-Event-ID`, with periodic heartbeats. Connections are bounded in time and
+close cleanly if a read fails mid-stream, so the browser simply reconnects.
+Because `EventSource` cannot set an `Authorization` header, pass the access
+token as `?token=…`. See
 [ADR 0003](docs/adr/0003-analytics-and-sse.md) for the design.
 
 ## Frontend
@@ -130,7 +141,7 @@ picture, request lifecycle and SSE flow are in
 
 - **Backend** — Python 3.13, FastAPI, SQLAlchemy 2.0, Alembic, PostgreSQL 17, JWT auth, SSE
 - **Frontend** — React 19, TypeScript (strict), Vite, TanStack Router/Query, CSS Modules + design tokens (ligne-claire brutalist UI)
-- **Quality** — pytest (+testcontainers), Hypothesis, Vitest, Playwright, ruff, mypy, coverage gate ≥80%
+- **Quality** — pytest (+testcontainers), Hypothesis, Vitest, Playwright, ruff, mypy, backend coverage gate ≥80% and a frontend coverage gate, plus `pip-audit`/`pnpm audit` and Dependabot
 - **DX** — `flake.nix` (devShell, formatter, checks), `just`, `pre-commit`, `uv`, `pnpm`, GitHub Actions
 
 ## Repository layout
@@ -141,8 +152,52 @@ picture, request lifecycle and SSE flow are in
 ├── compose.yaml     # PostgreSQL for local dev
 ├── backend/         # FastAPI app (api / application / domain / infrastructure)
 ├── frontend/        # React SPA (Vite + TanStack Router/Query + design tokens)
-└── docs/            # ADRs (architecture notes and screenshots to come)
+└── docs/            # ADRs, architecture guide and screenshots
 ```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and
+[SECURITY.md](SECURITY.md) for how to report issues. Notable changes are tracked
+in [CHANGELOG.md](CHANGELOG.md).
+
+## Engineering decisions
+
+The interesting parts of this codebase are the trade-offs, and each one is
+written down as a numbered ADR in [`docs/adr/`](docs/adr) (indexed in
+[docs/architecture.md](docs/architecture.md)):
+
+- **Ports and adapters, with a pure domain.** The domain holds dataclasses and
+  repository `Protocol`s; SQLAlchemy and FastAPI only appear in the outer
+  layers. Mappers translate at the boundary, so the domain has no ORM imports.
+- **Contract choices that are easy to miss.** Errors are RFC 7807
+  `application/problem+json`; `Decimal` levels serialise as strings to avoid
+  float drift in the client.
+- **A cursor, not a broadcast, for "live".** The SSE endpoint polls
+  `activity_events` from the last seen id and resumes from `Last-Event-ID`, so a
+  dropped connection loses nothing. Polls open a short-lived session each time.
+- **Failure is a first-class path.** The frontend has an error boundary, a
+  retry policy that skips deterministic `4xx`, and a toaster for background
+  failures; the SSE stream is time-bounded and survives mid-stream errors.
+- **One reproducible environment.** `flake.nix` pins the entire toolchain, so
+  local, CI and `nix flake check` all run the same versions.
+
+See [ADR 0008](docs/adr/0008-error-handling-and-stream-lifecycle.md) for the
+error-handling and stream-lifecycle rationale.
+
+## What I would do next
+
+The scope is intentionally bounded (see
+[ADR 0007](docs/adr/0007-scope-and-deployment.md)); with more time, the
+highest-value follow-ups are:
+
+- **Pagination and virtualisation** on the leaderboard as the cohort grows.
+- **Token rotation with a refresh denylist**, and moving the SSE token out of
+  the query string (e.g. a short-lived stream ticket).
+- **Promote the audits to blocking** once the current advisories are triaged,
+  and add a scheduled full runs so Dependabot PRs are exercised.
+- **Deployment**: container images and a small staging environment, which the
+  architecture already allows but the demo deliberately omits.
 
 ## License
 

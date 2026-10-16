@@ -4,6 +4,24 @@
   min-height: 100%;
 }
 
+.skipLink {
+  position: absolute;
+  left: var(--space-3);
+  top: -3rem;
+  z-index: 20;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-weight: 700;
+  text-decoration: none;
+  transition: top var(--duration-fast) var(--ease-out);
+}
+
+.skipLink:focus {
+  top: var(--space-3);
+  color: var(--color-paper);
+}
+
 .header {
   display: flex;
   align-items: center;
@@ -88,4 +106,10 @@
   width: min(1120px, 100%);
   margin: 0 auto;
   padding: var(--space-6);
+}
+
+/* Focused programmatically on navigation; the landmark is not interactive so
+   the focus ring would only add noise. */
+.main:focus {
+  outline: none;
 }

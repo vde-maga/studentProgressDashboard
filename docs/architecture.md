@@ -75,7 +75,10 @@ off. Periodic heartbeats keep intermediaries from closing the connection. See
 [ADR 0003](adr/0003-analytics-and-sse.md).
 
 Because `EventSource` cannot set headers, the access token rides in the `token`
-query parameter.
+query parameter. A connection is **bounded in time** (and a mid-stream database
+failure closes it cleanly); the browser reconnects from `Last-Event-ID`, so the
+cap is invisible to clients. See
+[ADR 0008](adr/0008-error-handling-and-stream-lifecycle.md).
 
 ## Testing
 
@@ -105,3 +108,4 @@ checks CI runs.
 - [0005 — Profile, charts and live feed](adr/0005-profile-charts-and-live-feed.md)
 - [0006 — End-to-end tests](adr/0006-end-to-end-tests.md)
 - [0007 — Scope: a portfolio demo](adr/0007-scope-and-deployment.md)
+- [0008 — Error handling and the SSE connection lifecycle](adr/0008-error-handling-and-stream-lifecycle.md)
