@@ -19,6 +19,7 @@ import { RadarChart } from '@/shared/charts/RadarChart'
 import { formatDay, formatLevel, formatXp } from '@/shared/format'
 import { Alert } from '@/shared/ui/Alert'
 import { Card } from '@/shared/ui/Card'
+import { LiveIndicator } from '@/shared/ui/LiveIndicator'
 import { Spinner } from '@/shared/ui/Spinner'
 import { Stat } from '@/shared/ui/Stat'
 import styles from './StudentProfilePage.module.css'
@@ -167,12 +168,7 @@ export function StudentProfilePage({ login }: StudentProfilePageProps) {
         heading={
           <span className={styles.feedHeading}>
             Activity
-            <span
-              className={`${styles.live} ${status === 'open' ? styles.liveOn : ''}`}
-              title={status === 'open' ? 'Live' : 'Connecting'}
-            >
-              ● live
-            </span>
+            <LiveIndicator status={status} />
           </span>
         }
         eyebrow="Recent events"

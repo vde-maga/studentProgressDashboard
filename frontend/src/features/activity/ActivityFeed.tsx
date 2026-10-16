@@ -34,7 +34,7 @@ export function ActivityFeed({
     return <p className={styles.empty}>{emptyLabel}</p>
   }
   return (
-    <ol className={styles.feed}>
+    <ol className={styles.feed} aria-live="polite" aria-relevant="additions">
       {items.map((item) => (
         <li key={item.id} className={styles.row}>
           <span className={styles.kind}>{KIND_LABEL[item.kind]}</span>

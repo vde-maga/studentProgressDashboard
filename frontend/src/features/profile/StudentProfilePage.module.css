@@ -69,19 +69,6 @@
   gap: var(--space-3);
 }
 
-.live {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
-  color: var(--color-muted);
-}
-
-.liveOn {
-  color: var(--color-success);
-}
-
 @media (max-width: 860px) {
   .grid {
     grid-template-columns: 1fr;
