@@ -15,6 +15,7 @@ from spd.core.security import create_access_token
 from spd.domain.enums import Role
 from spd.infrastructure.db import models as orm
 from spd.infrastructure.db.session import create_session_factory, get_session
+from spd.infrastructure.repositories import SqlAnalyticsRepository
 from spd.infrastructure.seed import DEMO_PASSWORD, SeedConfig, Seeder
 from spd.main import create_app
 
@@ -133,9 +134,13 @@ async def test_event_stream_heartbeats(engine: AsyncEngine) -> None:
 
 
 async def _drive_stream(
-    app: object, *, token: str, stop_after: bytes
+    app: object, *, token: str, stop_after: bytes | None
 ) -> tuple[int, list[bytes]]:
-    """Run the SSE endpoint at the ASGI layer, disconnecting after a frame."""
+    """Run the SSE endpoint at the ASGI layer, disconnecting after a frame.
+
+    Pass ``stop_after=None`` to let the stream finish on its own (used to prove
+    the connection lifetime cap).
+    """
     scope = {
         "type": "http",
         "asgi": {"version": "3.0", "spec_version": "2.0"},
@@ -166,8 +171,60 @@ async def _drive_stream(
             body = message.get("body", b"")
             if isinstance(body, bytes) and body:
                 frames.append(body)
-                if stop_after in body:
+                if stop_after is not None and stop_after in body:
                     stop.set()
 
     await app(scope, receive, send)  # type: ignore[operator]
     return status, frames
+
+
+async def test_event_stream_ends_after_the_connection_lifetime(
+    engine: AsyncEngine,
+) -> None:
+    """A bounded connection: the stream closes on its own, without a client
+    disconnect, so the browser can resume from ``Last-Event-ID``."""
+    settings = Settings(
+        _env_file=None,
+        environment=Environment.TESTING,
+        sse_poll_interval_seconds=0.01,
+        sse_heartbeat_seconds=999,
+        sse_max_connection_seconds=0.05,
+    )
+    app = create_app(settings)
+    app.state.session_factory = create_session_factory(engine)
+    token = create_access_token(
+        subject=1, login="alice", role=Role.STUDENT, settings=settings
+    )
+
+    status, frames = await _drive_stream(app, token=token, stop_after=None)
+
+    assert status == 200
+    assert frames[0] == b": connected\n\n"
+
+
+async def test_event_stream_closes_gracefully_when_the_database_fails(
+    engine: AsyncEngine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A mid-stream read failure must close cleanly, not tear down the request."""
+
+    async def _boom(*args: object, **kwargs: object) -> list[object]:
+        raise RuntimeError("database is down")
+
+    monkeypatch.setattr(SqlAnalyticsRepository, "events_after", _boom)
+    settings = Settings(
+        _env_file=None,
+        environment=Environment.TESTING,
+        sse_poll_interval_seconds=0.01,
+        sse_heartbeat_seconds=999,
+        sse_max_connection_seconds=5,
+    )
+    app = create_app(settings)
+    app.state.session_factory = create_session_factory(engine)
+    token = create_access_token(
+        subject=1, login="alice", role=Role.STUDENT, settings=settings
+    )
+
+    status, frames = await _drive_stream(app, token=token, stop_after=None)
+
+    assert status == 200
+    assert frames[0] == b": connected\n\n"

@@ -6,6 +6,7 @@ for a long time, each poll opens its own short-lived session instead of holding
 the request session open for the connection's lifetime.
 """
 
+import asyncio
 from collections.abc import AsyncIterator
 from datetime import date, datetime
 from typing import Annotated
@@ -99,16 +100,26 @@ async def stream_events(
 
     async def event_source() -> AsyncIterator[str]:
         yield ": connected\n\n"
-        async for item in stream_activity(
-            fetch,
-            last_id=last_id,
-            poll_interval=settings.sse_poll_interval_seconds,
-            heartbeat_interval=settings.sse_heartbeat_seconds,
-        ):
-            if isinstance(item, Heartbeat):
-                yield ": heartbeat\n\n"
-            else:
-                yield _frame(item)
+        try:
+            async for item in stream_activity(
+                fetch,
+                last_id=last_id,
+                poll_interval=settings.sse_poll_interval_seconds,
+                heartbeat_interval=settings.sse_heartbeat_seconds,
+                max_duration=settings.sse_max_connection_seconds,
+            ):
+                if isinstance(item, Heartbeat):
+                    yield ": heartbeat\n\n"
+                else:
+                    yield _frame(item)
+        except asyncio.CancelledError:
+            # The client went away; let the cancellation propagate.
+            raise
+        except Exception:
+            # A transient failure (e.g. the database) must not tear the
+            # connection down with a stack trace: close the response cleanly
+            # and let the browser's EventSource reconnect from `Last-Event-ID`.
+            logger.exception("activity_stream_failed")
 
     return StreamingResponse(
         event_source(),

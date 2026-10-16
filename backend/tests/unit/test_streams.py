@@ -68,3 +68,20 @@ async def test_heartbeat_is_emitted_when_idle() -> None:
     ]
 
     assert produced == [Heartbeat()]
+
+
+async def test_the_stream_stops_once_the_max_duration_is_reached() -> None:
+    _, fetch = _fetch_releasing([_item(1)])
+
+    produced = [
+        item
+        async for item in stream_activity(
+            fetch,
+            last_id=0,
+            poll_interval=0,
+            heartbeat_interval=999,
+            max_duration=0,
+        )
+    ]
+
+    assert produced == []
