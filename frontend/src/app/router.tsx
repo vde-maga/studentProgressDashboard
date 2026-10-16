@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-router'
 
 import { AppShell } from '@/app/AppShell'
+import { ErrorPage } from '@/features/error/ErrorPage'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { LeaderboardPage } from '@/features/leaderboard/LeaderboardPage'
@@ -72,6 +73,10 @@ const routeTree = rootRoute.addChildren([
 export const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
+  // Any route component that throws renders this instead of unwinding the app.
+  defaultErrorComponent: ({ error, reset }) => (
+    <ErrorPage error={error} onRetry={reset} />
+  ),
 })
 
 declare module '@tanstack/react-router' {
