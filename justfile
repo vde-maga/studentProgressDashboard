@@ -84,7 +84,7 @@ cov-frontend: ## Coverage report (frontend, gate configured in vite.config.ts)
     @if [ -f frontend/package.json ]; then pnpm --dir frontend test:coverage; fi
 
 audit-backend: ## Audit Python dependencies for known vulnerabilities
-    @cd backend && uv run --with pip-audit pip-audit
+    @cd backend && uv export --frozen --no-hashes --no-emit-project -o - | uv run --with pip-audit pip-audit -r -
 
 audit-frontend: ## Audit Node dependencies for known vulnerabilities
     @pnpm --dir frontend audit --audit-level=high
