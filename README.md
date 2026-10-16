@@ -6,14 +6,24 @@
 
 ## Status
 
-The **backend is complete** (phases 1–5): PostgreSQL data layer, JWT auth and
-the analytics API with a live SSE stream, behind a **CI pipeline** (phase 9).
-The **React frontend** covers the sign-in flow, an authenticated session with
-transparent token refresh, the cohort dashboard, the leaderboard and the
-**student profile** (XP/level, progress and skills charts, live activity) —
-phases 6–7 — with **end-to-end tests** over the real stack (phase 8). The
-**final docs/release** (phase 10) is still to come. The frontend runs under Vite
-in development (proxied to the API); there is no production build pipeline yet.
+Complete. The **backend** (phases 1–5) provides the PostgreSQL data layer, JWT
+auth and the analytics API with a live SSE stream; the **React frontend**
+(phases 6–7) covers sign-in, the cohort dashboard, the leaderboard and the
+student profile; **end-to-end tests** (phase 8) exercise the real stack; **CI**
+(phase 9) gates every change; and the **docs and release** (phase 10) close it
+out. See [docs/architecture.md](docs/architecture.md) for the layering.
+
+This is a portfolio demo, not a production deployment — see
+[ADR 0007](docs/adr/0007-scope-and-deployment.md) for what that deliberately
+implies.
+
+## Screenshots
+
+| Sign in                                             | Dashboard                                       |
+| --------------------------------------------------- | ----------------------------------------------- |
+| ![Sign in](docs/screenshots/01-login.png)           | ![Dashboard](docs/screenshots/02-dashboard.png) |
+| **Leaderboard**                                     | **Student profile**                             |
+| ![Leaderboard](docs/screenshots/03-leaderboard.png) | ![Profile](docs/screenshots/04-profile.png)     |
 
 ## Quickstart (NixOS)
 
@@ -38,7 +48,8 @@ just dev             # API :8000 + frontend :5173
 | `just cov`                   | Backend coverage report (gate ≥80%)              |
 | `just test-frontend`         | Frontend unit tests (vitest)                     |
 | `just build-frontend`        | Type-check and build the SPA (`frontend/dist`)   |
-| `just test-e2e`              | Playwright end-to-end (phase 8)                  |
+| `just test-e2e`              | Playwright end-to-end against the real stack     |
+| `just screenshots`           | Regenerate the README screenshots                |
 | `just lint`                  | ruff, mypy, tsc, eslint                          |
 | `just fmt`                   | Format the whole repo (`nix fmt`)                |
 | `just db-up` / `db-reset`    | Start / recreate PostgreSQL                      |
@@ -106,6 +117,14 @@ API and the Vite server itself (start the database first with `just db-up`).
 See [ADR 0004](docs/adr/0004-frontend-foundation.md),
 [ADR 0005](docs/adr/0005-profile-charts-and-live-feed.md) and
 [ADR 0006](docs/adr/0006-end-to-end-tests.md) for the design.
+
+## Architecture
+
+The backend is laid out as ports-and-adapters (`api → application → domain`,
+with `infrastructure` implementing repository protocols); the frontend splits
+`app` / `features` / `shared`. Every phase is documented by an ADR. The full
+picture, request lifecycle and SSE flow are in
+[docs/architecture.md](docs/architecture.md).
 
 ## Stack
 
