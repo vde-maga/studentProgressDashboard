@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-10-16
+
 ### Added
 
 - Frontend error boundary with a dedicated error page, a notification toaster
@@ -76,7 +78,8 @@ React 19 + TypeScript SPA, reproducible in one Nix dev shell.
 - Backend foundation: project skeleton, PostgreSQL data layer and the
   deterministic seeder.
 
-[Unreleased]: https://github.com/vde-maga/studentProgressDashboard/compare/v1.0.0...dev
+[Unreleased]: https://github.com/vde-maga/studentProgressDashboard/compare/v1.1.0...dev
+[1.1.0]: https://github.com/vde-maga/studentProgressDashboard/releases/tag/v1.1.0
 [1.0.0]: https://github.com/vde-maga/studentProgressDashboard/releases/tag/v1.0.0
 [0.4.0]: https://github.com/vde-maga/studentProgressDashboard/releases/tag/v0.4.0
 [0.3.0]: https://github.com/vde-maga/studentProgressDashboard/releases/tag/v0.3.0
