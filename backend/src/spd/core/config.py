@@ -40,6 +40,10 @@ class Settings(BaseSettings):
     jwt_refresh_token_expire_days: int = Field(default=14, ge=1)
     sse_poll_interval_seconds: float = Field(default=2.0, gt=0)
     sse_heartbeat_seconds: float = Field(default=15.0, gt=0)
+    # Cap on how long a single SSE connection may live. The browser's
+    # EventSource reconnects from `Last-Event-ID`, so a bounded connection is
+    # invisible to clients while keeping server resources finite.
+    sse_max_connection_seconds: float = Field(default=600.0, gt=0)
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
     docs_enabled: bool = True
 
