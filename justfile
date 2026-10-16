@@ -63,8 +63,16 @@ test-integration: ## Run integration tests (needs a container engine)
 test-frontend:
     @if [ -f frontend/package.json ]; then cd frontend && pnpm test; else echo "frontend not scaffolded yet"; fi
 
+build-frontend: ## Type-check and build the frontend bundle
+    @if [ -f frontend/package.json ]; then cd frontend && pnpm build; else echo "frontend not scaffolded yet"; fi
+
 test-e2e:
     @if [ -f frontend/package.json ]; then cd frontend && pnpm test:e2e; else echo "frontend not scaffolded yet"; fi
+
+e2e-api: ## Migrate, seed and serve the API for Playwright (foreground)
+    @cd backend && uv run alembic upgrade head
+    @cd backend && uv run python -m spd.infrastructure.seed
+    @cd backend && uv run uvicorn spd.main:app --host 0.0.0.0 --port 8000
 
 cov: ## Coverage report (backend, gate ≥80%; includes integration tests)
     @cd backend && uv run pytest -o addopts="" -m "integration or not integration" --cov=spd --cov-report=term-missing --cov-fail-under=80

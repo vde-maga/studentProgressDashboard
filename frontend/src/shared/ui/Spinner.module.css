@@ -1,0 +1,31 @@
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.dot {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border: var(--border-thin);
+  background: var(--color-accent);
+  animation: blink 0.9s steps(2, start) infinite;
+}
+
+.lg .dot {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot {
+    animation: none;
+  }
+}

@@ -1,0 +1,88 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.title {
+  font-size: var(--text-2xl);
+}
+
+.lead {
+  color: var(--fg-muted);
+}
+
+.card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.table caption {
+  text-align: left;
+  padding: var(--space-4);
+}
+
+.table th,
+.table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  border-bottom: var(--border-thin);
+  white-space: nowrap;
+}
+
+.table thead th {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  background: var(--color-paper-alt);
+}
+
+.table tbody tr:hover {
+  background: var(--color-paper-alt);
+}
+
+.num {
+  text-align: right;
+}
+
+.rank {
+  font-weight: 700;
+}
+
+.login {
+  display: block;
+  font-weight: 700;
+}
+
+.studentLink {
+  color: var(--fg-default);
+  text-decoration: none;
+}
+
+.studentLink:hover .login {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.name {
+  display: block;
+  color: var(--fg-muted);
+  font-size: var(--text-xs);
+}

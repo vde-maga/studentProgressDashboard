@@ -1,0 +1,17 @@
+.card {
+  background: var(--color-paper);
+  border: var(--border-thin);
+  box-shadow: var(--shadow-hard);
+  padding: var(--space-5);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+}
+
+.title {
+  font-size: var(--text-lg);
+}
