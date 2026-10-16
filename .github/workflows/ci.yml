@@ -97,3 +97,52 @@ jobs:
         run: nix develop -c bash -c 'pnpm install --dir frontend --frozen-lockfile'
       - name: Type-check, lint, test and build
         run: nix develop -c bash -c 'just lint-frontend && just test-frontend && just build-frontend'
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: spd
+          POSTGRES_PASSWORD: spd
+          POSTGRES_DB: spd_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U spd -d spd_dev"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: spd
+      PGPASSWORD: spd
+      PGDATABASE: spd_dev
+    steps:
+      - uses: actions/checkout@v5
+      - uses: cachix/install-nix-action@v31
+      - uses: nix-community/cache-nix-action@v7
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('flake.lock', 'backend/uv.lock', 'frontend/pnpm-lock.yaml') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          gc-max-store-size-linux: 5G
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+      - name: Install dependencies
+        run: nix develop -c bash -c 'pnpm install --dir frontend --frozen-lockfile'
+      - name: Run end-to-end tests
+        run: nix develop -c bash -c 'just test-e2e'
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/test-results/
+          retention-days: 7

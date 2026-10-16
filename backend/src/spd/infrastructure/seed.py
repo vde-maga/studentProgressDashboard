@@ -15,7 +15,7 @@ from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal
 
 from faker import Faker
-from sqlalchemy import delete, insert
+from sqlalchemy import delete, insert, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 
@@ -34,6 +34,20 @@ from spd.infrastructure.db.session import create_engine, create_session_factory
 __all__ = ["DEMO_PASSWORD", "SeedConfig", "Seeder"]
 
 _ONE_DAY = timedelta(days=1)
+
+# Tables populated with explicit ids, whose identity sequences must be advanced
+# afterwards so later application inserts (e.g. a live activity event) don't
+# collide with the seeded rows.
+_SEQUENCED_TABLES = (
+    "campuses",
+    "cursus",
+    "skills",
+    "projects",
+    "users",
+    "enrollments",
+    "audits",
+    "activity_events",
+)
 
 # Password shared by every seeded account, so the demo is explorable without
 # real credentials. The hash is a precomputed Argon2id value of this exact
@@ -138,6 +152,24 @@ class Seeder:
         await self._seed_activity(session, student_ids, project_ids, finishes)
         await self._seed_skill_levels(session, student_ids)
         await session.commit()
+        await self._reset_sequences(session)
+        await session.commit()
+
+    @staticmethod
+    async def _reset_sequences(session: AsyncSession) -> None:
+        """Advance identity sequences past the explicitly seeded ids.
+
+        ``_bulk_insert`` writes rows with explicit primary keys, which does not
+        move the identity sequence. Without this, the next application insert
+        would reuse id ``1`` and collide.
+        """
+        for table in _SEQUENCED_TABLES:
+            await session.execute(
+                text(
+                    f"SELECT setval(pg_get_serial_sequence('{table}', 'id'), "
+                    f"COALESCE((SELECT MAX(id) FROM {table}), 1), true)"
+                )
+            )
 
     @staticmethod
     async def _bulk_insert(
