@@ -24,6 +24,18 @@ updates:
       node-minor-patch:
         patterns: ["*"]
         update-types: ["minor", "patch"]
+    ignore:
+      # TypeScript majors need a deliberate tsconfig migration (baseUrl deprecation).
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      # Types must track the Node runtime (nodejs_24), not the latest Node major.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # Pinned in lockstep with the Nix playwright-driver browser bundle.
+      - dependency-name: "@playwright/test"
+      # Keep ESLint plugin majors deliberate alongside the ESLint major.
+      - dependency-name: typescript-eslint
+        update-types: ["version-update:semver-major"]
 
   # GitHub Actions used by the CI workflow
   - package-ecosystem: github-actions
