@@ -171,11 +171,7 @@ jobs:
           gc-max-store-size-linux: 5G
       - name: Install frontend dependencies
         run: nix develop -c bash -c 'pnpm install --dir frontend --frozen-lockfile'
-      # Informational for now: reported in the log but not blocking PRs until the
-      # advisories are triaged. Promote to required once the signal is clean.
       - name: Audit Python dependencies
-        continue-on-error: true
         run: nix develop -c bash -c 'just audit-backend'
       - name: Audit Node dependencies
-        continue-on-error: true
         run: nix develop -c bash -c 'just audit-frontend'
