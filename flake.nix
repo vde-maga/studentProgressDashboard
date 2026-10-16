@@ -54,6 +54,9 @@
           pre-commit
           docker-client
           docker-compose
+
+          # ── Demo/screenshot capture ────────────────────────────────
+          ffmpeg
         ];
 
         # `nix fmt` — one formatter for the whole repo (DRY: same tools as CI).
