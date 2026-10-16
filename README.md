@@ -4,6 +4,14 @@
 
 [![CI](https://github.com/vde-maga/studentProgressDashboard/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 
+## Demo
+
+![Walkthrough: sign in, the live dashboard, the leaderboard and the student profile](docs/screenshots/demo.gif)
+
+A short walkthrough — sign in, the cohort dashboard updating over the live SSE
+stream, the leaderboard, and the student profile with its SVG charts. Regenerate
+it locally with `just db-up && just demo`.
+
 ## Status
 
 Complete. The **backend** (phases 1–5) provides the PostgreSQL data layer, JWT
@@ -50,7 +58,6 @@ just dev             # API :8000 + frontend :5173
 | `just dev`                   | Run API + frontend in parallel                   |
 | `just test`                  | pytest + vitest                                  |
 | `just test-integration`      | Backend integration tests (testcontainers)       |
-| `just cov`                   | Backend coverage report (gate ≥80%)              |
 | `just cov`                   | Backend coverage report (gate ≥80%)              |
 | `just cov-frontend`          | Frontend coverage report (gate in `vite.config`) |
 | `just test-frontend`         | Frontend unit tests (vitest)                     |
@@ -154,6 +161,24 @@ picture, request lifecycle and SSE flow are in
 ├── frontend/        # React SPA (Vite + TanStack Router/Query + design tokens)
 └── docs/            # ADRs, architecture guide and screenshots
 ```
+
+## Reviewer's guide
+
+For a quick tour: run it with the [Quickstart](#quickstart-nixos), sign in with
+any seeded login (password `42cursus!`, e.g. `johnsonjoshu`), then read in this
+order:
+
+- [`docs/architecture.md`](docs/architecture.md) — layering, the request and SSE
+  flows, and the [ADR index](docs/adr).
+- [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — the quality bar that
+  gates every change.
+- `backend/src/spd/domain/progress.py` — pure XP→level maths;
+  `backend/src/spd/application/streams.py` + `backend/src/spd/api/v1/events.py` —
+  the SSE cursor.
+- `frontend/src/shared/api/client.ts` — bearer auth with single-flight refresh;
+  `frontend/src/shared/api/retry.ts` — the retry policy.
+- [Engineering decisions](#engineering-decisions) — the trade-offs, each backed
+  by an ADR.
 
 ## Contributing
 
