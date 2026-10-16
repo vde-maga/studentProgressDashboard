@@ -141,6 +141,8 @@ export function StudentProfilePage({ login }: StudentProfilePageProps) {
         <Card heading="XP over time" eyebrow="Daily snapshots">
           {progress.isPending ? (
             <Spinner label="Loading series" />
+          ) : progress.isError ? (
+            <Alert tone="error">{progress.error.message}</Alert>
           ) : (
             <LineChart
               values={levels}
@@ -153,6 +155,8 @@ export function StudentProfilePage({ login }: StudentProfilePageProps) {
         <Card heading="Skills" eyebrow="Current levels">
           {skills.isPending ? (
             <Spinner label="Loading skills" />
+          ) : skills.isError ? (
+            <Alert tone="error">{skills.error.message}</Alert>
           ) : (
             <RadarChart
               data={radar}
@@ -179,6 +183,8 @@ export function StudentProfilePage({ login }: StudentProfilePageProps) {
       >
         {activity.isPending && rows.length === 0 ? (
           <Spinner label="Loading activity" />
+        ) : activity.isError && rows.length === 0 ? (
+          <Alert tone="error">{activity.error.message}</Alert>
         ) : (
           <ActivityFeed items={rows} emptyLabel="No activity recorded yet." />
         )}
