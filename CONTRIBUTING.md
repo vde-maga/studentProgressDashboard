@@ -29,7 +29,7 @@ just setup           # backend + frontend deps and the pre-commit hooks
 | Coverage (frontend) | `just cov-frontend`          |
 | End-to-end          | `just test-e2e`              |
 
-`just help` lists every recipe. Run `pre-commit run --all-files` before pushing;
+`just --list` lists every recipe. Run `pre-commit run --all-files` before pushing;
 CI runs the same formatters and checks.
 
 ## Branching and commits
