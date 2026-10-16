@@ -9,6 +9,7 @@ generator lets it be tested without a running server or a database.
 from __future__ import annotations
 
 import asyncio
+import time
 from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass
 
@@ -31,17 +32,23 @@ async def stream_activity(
     poll_interval: float,
     heartbeat_interval: float,
     max_polls: int | None = None,
+    max_duration: float | None = None,
 ) -> AsyncIterator[ActivityItem | Heartbeat]:
     """Poll ``fetch`` for events newer than ``last_id`` and yield them.
 
     Yields each :class:`ActivityItem` in arrival order, and a
     :class:`Heartbeat` once ``heartbeat_interval`` seconds pass without new
-    events. ``max_polls`` bounds the loop (used by tests).
+    events. ``max_polls`` bounds the loop (used by tests) and ``max_duration``
+    bounds how long the stream may live, after which the generator ends and the
+    client reconnects from ``Last-Event-ID``.
     """
     since = last_id
     quiet_for = 0.0
     polls = 0
-    while max_polls is None or polls < max_polls:
+    deadline = None if max_duration is None else time.monotonic() + max_duration
+    while (max_polls is None or polls < max_polls) and (
+        deadline is None or time.monotonic() < deadline
+    ):
         events = await fetch(since)
         if events:
             quiet_for = 0.0

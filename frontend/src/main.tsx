@@ -1,9 +1,11 @@
 import { RouterProvider } from '@tanstack/react-router'
 import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
 
+import { ErrorBoundary } from '@/app/ErrorBoundary'
 import { AppProviders } from '@/app/providers'
 import { router } from '@/app/router'
+import { createRoot } from 'react-dom/client'
+
 import '@/shared/styles/global.css'
 
 const rootElement = document.getElementById('root')
@@ -13,8 +15,10 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <AppProviders>
-      <RouterProvider router={router} />
-    </AppProviders>
+    <ErrorBoundary>
+      <AppProviders>
+        <RouterProvider router={router} />
+      </AppProviders>
+    </ErrorBoundary>
   </StrictMode>,
 )

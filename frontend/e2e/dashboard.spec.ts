@@ -17,7 +17,7 @@ test('delivers a new activity event over the live stream', async ({ page }) => {
   await signIn(page, STUDENT)
 
   // The stream has connected (and captured its cursor) once the marker reads live.
-  await expect(page.getByTitle('Live')).toBeVisible()
+  await expect(page.getByText('Live', { exact: true })).toBeVisible()
   await expect(page.getByText('Waiting for activity…')).toBeVisible()
 
   emitActivity(STUDENT, 'project_validated')

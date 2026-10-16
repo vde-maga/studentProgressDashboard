@@ -1,4 +1,5 @@
-import { Link, Outlet } from '@tanstack/react-router'
+import { Link, Outlet, useRouterState } from '@tanstack/react-router'
+import { useEffect, useRef } from 'react'
 
 import { useAuth } from '@/shared/auth/useAuth'
 import { Button } from '@/shared/ui/Button'
@@ -6,8 +7,25 @@ import styles from './AppShell.module.css'
 
 export function AppShell() {
   const { user, logout } = useAuth()
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const mainRef = useRef<HTMLElement>(null)
+  const isFirstRender = useRef(true)
+
+  // Move focus to the main landmark on navigation so keyboard and screen-reader
+  // users land on the new content instead of staying on the activated link.
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    mainRef.current?.focus()
+  }, [pathname])
+
   return (
     <div className={styles.shell}>
+      <a href="#main" className={styles.skipLink}>
+        Skip to content
+      </a>
       <header className={styles.header}>
         <Link to="/" className={styles.brand}>
           <span className={styles.mark}>SPD</span>
@@ -46,7 +64,7 @@ export function AppShell() {
           </Button>
         </div>
       </header>
-      <main className={styles.main}>
+      <main id="main" ref={mainRef} tabIndex={-1} className={styles.main}>
         <Outlet />
       </main>
     </div>

@@ -7,6 +7,7 @@ import { useAuth } from '@/shared/auth/useAuth'
 import { formatLevel, formatXp } from '@/shared/format'
 import { Alert } from '@/shared/ui/Alert'
 import { Card } from '@/shared/ui/Card'
+import { LiveIndicator } from '@/shared/ui/LiveIndicator'
 import { Spinner } from '@/shared/ui/Spinner'
 import { Stat } from '@/shared/ui/Stat'
 import styles from './DashboardPage.module.css'
@@ -53,12 +54,7 @@ export function DashboardPage() {
         heading={
           <span className={styles.feedHeading}>
             Live activity
-            <span
-              className={`${styles.live} ${status === 'open' ? styles.liveOn : ''}`}
-              title={status === 'open' ? 'Live' : 'Connecting'}
-            >
-              ● live
-            </span>
+            <LiveIndicator status={status} />
           </span>
         }
         eyebrow="Across the cohort"
